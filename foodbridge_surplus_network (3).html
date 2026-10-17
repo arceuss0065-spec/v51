@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodBridge Mumbai - Surplus Food Rescue Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#0B0F19',
+                            900: '#0F172A',
+                            800: '#1E293B',
+                            700: '#334155',
+                            600: '#475569'
+                        },
+                        electric: {
+                            400: '#60A5FA',
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                            700: '#1D4ED8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            user-select: none;
+        }
+        /* Device Framing Modes */
+        .device-iphone {
+            width: 393px;
+            height: 840px;
+            border-radius: 44px;
+            border: 10px solid #334155;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        .device-android {
+            width: 412px;
+            height: 870px;
+            border-radius: 36px;
+            border: 8px solid #1E293B;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        .device-desktop {
+            width: 100%;
+            height: 100%;
+            border-radius: 0px;
+            border: none;
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #0F172A; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        @keyframes pulsePin {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .pin-active {
+            animation: pulsePin 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased">
+
+    <!-- TOP CONTROL & NAV BAR -->
+    <header class="bg-slate-900 border-b border-slate-800 py-2.5 px-4 sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-electric-500/20 border border-electric-500/40 flex items-center justify-center text-electric-500 font-extrabold text-lg shadow-sm">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base text-white tracking-tight flex items-center gap-2">
+                    FoodBridge <span class="text-[10px] px-2 py-0.5 rounded-full bg-electric-500/20 text-electric-400 border border-electric-500/30">Mumbai</span>
+                </h1>
+                <p class="text-[11px] text-slate-400 hidden sm:block">Surplus Rescue & Logistics Platform</p>
+            </div>
+        </div>
+
+        <!-- View Mode Shell Switcher -->
+        <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700 text-xs">
+            <span class="text-slate-400 px-2 font-medium hidden md:inline"><i class="fa-solid fa-display mr-1"></i> Shell:</span>
+            <button onclick="setDeviceMode('desktop')" id="shell-btn-desktop" class="shell-btn px-3 py-1.5 rounded-lg transition font-medium text-white bg-electric-500">
+                <i class="fa-solid fa-laptop mr-1"></i> Web App
+            </button>
+            <button onclick="setDeviceMode('iphone')" id="shell-btn-iphone" class="shell-btn px-3 py-1.5 rounded-lg transition font-medium text-slate-400 hover:text-white">
+                <i class="fa-solid fa-mobile-screen-button mr-1"></i> iPhone
+            </button>
+            <button onclick="setDeviceMode('android')" id="shell-btn-android" class="shell-btn px-3 py-1.5 rounded-lg transition font-medium text-slate-400 hover:text-white">
+                <i class="fa-brands fa-android mr-1"></i> Android
+            </button>
+        </div>
+
+        <!-- Role & Auth Controls -->
+        <div class="flex items-center gap-2">
+            <div class="text-right hidden sm:block">
+                <p id="top-user-name" class="text-xs font-bold text-white">The Taj Mahal Palace</p>
+                <p id="top-user-role" class="text-[10px] text-electric-400 font-semibold">DONOR • Colaba, Mumbai</p>
+            </div>
+            <button onclick="openAuthModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs px-3 py-1.5 rounded-xl font-medium text-slate-200 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-user-gear text-electric-400"></i>
+                <span class="hidden sm:inline">Switch Role</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN VIEWPORT CONTAINER -->
+    <div class="flex-1 flex items-center justify-center p-0 md:p-3 overflow-hidden relative">
+        <div id="device-viewport" class="device-desktop bg-slate-900 flex flex-col transition-all duration-300 relative shadow-2xl">
+            
+            <!-- Mobile Status Bar (Hidden in Web view) -->
+            <div id="mobile-status-bar" class="hidden bg-slate-950 px-6 py-1.5 flex items-center justify-between text-xs text-slate-400 border-b border-slate-800">
+                <span class="font-bold text-white">14:10</span>
+                <div class="flex items-center gap-2 text-[10px]">
+                    <i class="fa-solid fa-signal"></i>
+                    <i class="fa-solid fa-wifi"></i>
+                    <i class="fa-solid fa-battery-full text-emerald-400"></i>
+                </div>
+            </div>
+
+            <!-- APP NAVIGATION TABS BAR -->
+            <nav class="bg-slate-900/90 border-b border-slate-800 px-3 py-2.5 flex items-center justify-between gap-1 shrink-0 overflow-x-auto">
+                <div class="flex items-center gap-1 min-w-max">
+                    <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold bg-electric-500 text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line"></i> <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('feed')" id="nav-btn-feed" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-utensils"></i> <span>Feed</span>
+                    </button>
+                    <button onclick="switchTab('map')" id="nav-btn-map" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-location-dot"></i> <span>Map Search</span>
+                    </button>
+                    <button onclick="switchTab('collections')" id="nav-btn-collections" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 relative">
+                        <i class="fa-solid fa-truck-ramp-box"></i> <span>Collections</span>
+                        <span id="tab-badge-collections" class="bg-electric-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+                    </button>
+                    <button onclick="switchTab('reviews')" id="nav-btn-reviews" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-star"></i> <span>Reviews</span>
+                    </button>
+                    <button onclick="switchTab('profile')" id="nav-btn-profile" class="nav-tab px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-id-card"></i> <span>Profile</span>
+                    </button>
+                </div>
+
+                <button id="btn-post-trigger" onclick="openPostModal()" class="bg-electric-500 hover:bg-electric-600 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition shadow-lg shadow-electric-500/20 flex items-center gap-1.5 shrink-0 ml-2">
+                    <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Post Surplus</span>
+                </button>
+            </nav>
+
+            <!-- PAGE CONTENT ROUTER -->
+            <div id="tab-content-area" class="flex-1 overflow-y-auto p-4 space-y-4">
+
+                <!-- 1. DASHBOARD TAB -->
+                <section id="tab-dashboard" class="space-y-4">
+                    <!-- Impact Summary Header Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl shadow-md">
+                            <p class="text-[11px] text-slate-400 font-medium">Total Food Rescued</p>
+                            <h3 id="stat-kg" class="text-xl font-extrabold text-white mt-1">1,240 kg</h3>
+                            <p class="text-[10px] text-emerald-400 mt-1"><i class="fa-solid fa-arrow-trend-up mr-1"></i> +12% this week</p>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl shadow-md">
+                            <p class="text-[11px] text-slate-400 font-medium">Meals Served</p>
+                            <h3 id="stat-meals" class="text-xl font-extrabold text-white mt-1">2,480</h3>
+                            <p class="text-[10px] text-electric-400 mt-1"><i class="fa-solid fa-bowl-food mr-1"></i> Direct distribution</p>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl shadow-md">
+                            <p class="text-[11px] text-slate-400 font-medium">CO₂ Emissions Avoided</p>
+                            <h3 id="stat-co2" class="text-xl font-extrabold text-white mt-1">3.1 Tons</h3>
+                            <p class="text-[10px] text-emerald-400 mt-1"><i class="fa-solid fa-leaf mr-1"></i> Landfill offset</p>
+                        </div>
+                        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl shadow-md">
+                            <p class="text-[11px] text-slate-400 font-medium">Active Mumbai Donors</p>
+                            <h3 id="stat-donors" class="text-xl font-extrabold text-white mt-1">48 Partners</h3>
+                            <p class="text-[10px] text-amber-400 mt-1"><i class="fa-solid fa-building-circle-check mr-1"></i> FSSAI Verified</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Banner & Role Quick Info -->
+                    <div class="bg-gradient-to-r from-electric-600/30 via-slate-800 to-slate-800 border border-electric-500/40 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+                        <div>
+                            <span id="dash-role-badge" class="text-[10px] bg-electric-500 text-white px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">DONOR VIEW</span>
+                            <h3 id="dash-welcome-title" class="font-bold text-lg text-white mt-1">Welcome back, The Taj Mahal Palace</h3>
+                            <p id="dash-welcome-subtitle" class="text-xs text-slate-300">You have 2 active surplus listings open for claim in Colaba.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="switchTab('feed')" class="bg-electric-500 hover:bg-electric-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-md">Browse Active Food</button>
+                            <button onclick="openPostModal()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Post New Item</button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Live Surplus Stream -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-sm text-white">Recent Mumbai Surplus Activity</h3>
+                            <button onclick="switchTab('feed')" class="text-xs text-electric-400 hover:underline">View All →</button>
+                        </div>
+                        <div id="dashboard-recent-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. FOOD LISTINGS FEED TAB -->
+                <section id="tab-feed" class="space-y-4 hidden">
+                    <!-- Filters & Category Controls -->
+                    <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+                        <div class="relative w-full sm:w-72">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="feed-search-input" oninput="renderFeedListings()" placeholder="Search food title or donor..." class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-electric-500">
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+                            <select id="feed-area-filter" onchange="renderFeedListings()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-electric-500">
+                                <option value="ALL">All Localities</option>
+                                <option value="Colaba">Colaba</option>
+                                <option value="Bandra West">Bandra West</option>
+                                <option value="Lower Parel">Lower Parel</option>
+                                <option value="Andheri East">Andheri East</option>
+                                <option value="Powai">Powai</option>
+                            </select>
+                            <select id="feed-diet-filter" onchange="renderFeedListings()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-electric-500">
+                                <option value="ALL">All Diet Types</option>
+                                <option value="Veg">Pure Veg</option>
+                                <option value="Non-Veg">Non-Veg</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Feed Grid -->
+                    <div id="feed-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Rendered Dynamically -->
+                    </div>
+                </section>
+
+                <!-- 3. MAP SEARCH VIEW TAB -->
+                <section id="tab-map" class="h-full flex flex-col space-y-3 hidden">
+                    <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-2xl flex flex-col sm:flex-row gap-2 shadow-md">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-location-crosshairs absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="map-search-text" oninput="renderMapPins()" placeholder="Search location or dish e.g. 'Bandra' or 'Biryani'..." class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-electric-500">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="map-area-select" onchange="renderMapPins()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-electric-500">
+                                <option value="ALL">All Mumbai Areas</option>
+                                <option value="Colaba">Colaba</option>
+                                <option value="Bandra West">Bandra West</option>
+                                <option value="Lower Parel">Lower Parel</option>
+                                <option value="Andheri East">Andheri East</option>
+                                <option value="Powai">Powai</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Google Maps Canvas -->
+                    <div id="map-canvas-container" class="relative flex-1 min-h-[400px] rounded-2xl border border-slate-700 bg-slate-950 overflow-hidden shadow-inner flex flex-col justify-between p-4" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 24px 24px;">
+                        
+                        <div class="flex items-center justify-between z-10">
+                            <div class="bg-slate-900/90 backdrop-blur border border-slate-700 text-[11px] px-3 py-1.5 rounded-xl font-medium text-slate-200 flex items-center gap-2 shadow-md">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Live Mumbai Map Radar (<span id="map-active-count">0</span> Active Pins)
+                            </div>
+                            <div class="flex items-center gap-1 bg-slate-900/90 border border-slate-700 p-1 rounded-xl text-xs">
+                                <button onclick="adjustZoom(0.2)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold">+</button>
+                                <button onclick="adjustZoom(-0.2)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold">-</button>
+                            </div>
+                        </div>
+
+                        <!-- Pins Interactive Layer -->
+                        <div id="map-pins-layer" class="absolute inset-0 top-12 bottom-12 overflow-hidden transition-all duration-300">
+                            <!-- Dynamic Pins -->
+                        </div>
+
+                        <!-- Selected Pin Item Preview Drawer -->
+                        <div id="map-drawer" class="z-20 bg-slate-900/95 backdrop-blur border border-electric-500/50 p-4 rounded-2xl shadow-2xl transition-all duration-300 hidden">
+                            <!-- Rendered dynamically on pin click -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. LOGISTICS & COLLECTIONS TRACKER TAB -->
+                <section id="tab-collections" class="space-y-4 hidden">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <h2 class="font-bold text-lg text-white">Logistics & Collection Pipeline</h2>
+                            <p class="text-xs text-slate-400">Track and manage active claim orders from Pending through Completion.</p>
+                        </div>
+                        <span id="collections-count-badge" class="text-xs bg-electric-500/20 text-electric-400 border border-electric-500/30 px-3 py-1 rounded-full font-bold">0 Orders</span>
+                    </div>
+
+                    <div id="collections-pipeline-list" class="space-y-3">
+                        <!-- Dynamic Order Pipeline Cards -->
+                    </div>
+                </section>
+
+                <!-- 5. VERIFIED REVIEWS & RATINGS TAB -->
+                <section id="tab-reviews" class="space-y-4 hidden">
+                    <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                        <div>
+                            <h2 class="font-bold text-lg text-white">Verified Pickup Reviews</h2>
+                            <p class="text-xs text-slate-400">Reviews are strictly unlocked only after a collection request status reaches "COMPLETED".</p>
+                        </div>
+                        <span class="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved"></i> Verified Transactions Only
+                        </span>
+                    </div>
+
+                    <div id="reviews-feed-container" class="space-y-3">
+                        <!-- Rendered Dynamically -->
+                    </div>
+                </section>
+
+                <!-- 6. EDITABLE PROFILE TAB -->
+                <section id="tab-profile" class="space-y-4 hidden">
+                    <!-- Profile Card Header -->
+                    <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-electric-500/20 border border-electric-500/40 text-electric-400 flex items-center justify-center text-2xl font-bold">
+                                <i class="fa-solid fa-building-user"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 id="prof-display-name" class="font-bold text-xl text-white">The Taj Mahal Palace</h2>
+                                    <span id="prof-display-role-badge" class="text-[10px] bg-electric-500/20 text-electric-400 border border-electric-500/30 px-2.5 py-0.5 rounded-full font-bold">DONOR</span>
+                                </div>
+                                <p id="prof-display-address" class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> Apollo Bunder, Colaba, Mumbai</p>
+                                <p id="prof-display-reg" class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-id-card text-electric-400 mr-1"></i> FSSAI: 11521001000892</p>
+                            </div>
+                        </div>
+
+                        <button onclick="saveProfileChanges()" class="w-full sm:w-auto bg-electric-500 hover:bg-electric-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-lg shadow-electric-500/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Profile Details
+                        </button>
+                    </div>
+
+                    <!-- Editable Details Form -->
+                    <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-2xl space-y-4">
+                        <h3 class="font-bold text-sm text-white border-b border-slate-700 pb-2">Account & Organization Settings</h3>
+                        <form id="profile-edit-form" onsubmit="event.preventDefault(); saveProfileChanges();" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <label class="block font-medium text-slate-300 mb-1">Organization / Entity Name *</label>
+                                <input type="text" id="prof-input-name" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-300 mb-1">FSSAI License / NGO Reg ID *</label>
+                                <input type="text" id="prof-input-reg" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-300 mb-1">Contact Phone Number *</label>
+                                <input type="text" id="prof-input-phone" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-300 mb-1">Primary Mumbai Area *</label>
+                                <select id="prof-input-area" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                                    <option value="Colaba">Colaba</option>
+                                    <option value="Bandra West">Bandra West</option>
+                                    <option value="Lower Parel">Lower Parel</option>
+                                    <option value="Andheri East">Andheri East</option>
+                                    <option value="Powai">Powai</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-medium text-slate-300 mb-1">Full Pickup Address & Instructions *</label>
+                                <input type="text" id="prof-input-address" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- POST SURPLUS FOOD MODAL -->
+    <div id="modal-post" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-electric-500"></i> Post New Surplus Food
+                </h3>
+                <button onclick="closePostModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="form-post-surplus" onsubmit="handlePostSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Food Item Title *</label>
+                    <input type="text" id="post-title" required placeholder="e.g. Fresh Paneer Biryani & Dal Makhani" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-electric-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Dietary Type *</label>
+                        <select id="post-diet" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            <option value="Veg">Pure Veg</option>
+                            <option value="Non-Veg">Non-Veg</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Quantity (kg / meals) *</label>
+                        <input type="text" id="post-quantity" required placeholder="e.g. 25 kg (50 portions)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-electric-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Storage Condition *</label>
+                        <select id="post-storage" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            <option value="Hot Container">Hot Insulated Container</option>
+                            <option value="Refrigerated">Refrigerated</option>
+                            <option value="Ambient">Ambient Room Temp</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-300 mb-1">Mumbai Area *</label>
+                        <select id="post-area" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-electric-500">
+                            <option value="Colaba">Colaba</option>
+                            <option value="Bandra West">Bandra West</option>
+                            <option value="Lower Parel">Lower Parel</option>
+                            <option value="Andheri East">Andheri East</option>
+                            <option value="Powai">Powai</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Pickup Time Window *</label>
+                    <input type="text" id="post-window" required placeholder="e.g. Today before 7:00 PM" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-electric-500">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Pickup Address & Instructions *</label>
+                    <textarea id="post-address" rows="2" required placeholder="e.g. Gate 3 Kitchen Entrance, Apollo Bunder, Colaba" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-electric-500"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closePostModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-electric-500 hover:bg-electric-600 font-bold text-white shadow-lg shadow-electric-500/20">Publish Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ROLE SWITCHER & AUTH MODAL -->
+    <div id="modal-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base">Select Platform Role Profile</h3>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <p class="text-xs text-slate-400">Switch between active account roles to test specific donor, recipient NGO, or admin workflows:</p>
+
+            <div class="space-y-3">
+                <div onclick="selectAccountRole('donor')" class="p-4 rounded-xl border border-electric-500/50 bg-electric-500/10 hover:bg-electric-500/20 cursor-pointer transition flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] bg-electric-500 text-white px-2 py-0.5 rounded-full font-bold">DONOR ACCOUNT</span>
+                        <h4 class="font-bold text-white text-sm mt-1">The Taj Mahal Palace, Mumbai</h4>
+                        <p class="text-xs text-slate-300">Colaba • FSSAI Verified</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-electric-400"></i>
+                </div>
+
+                <div onclick="selectAccountRole('recipient')" class="p-4 rounded-xl border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">RECIPIENT NGO</span>
+                        <h4 class="font-bold text-white text-sm mt-1">Roti Bank Mumbai NGO</h4>
+                        <p class="text-xs text-slate-300">Lower Parel • NGO Reg #88412</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-emerald-400"></i>
+                </div>
+
+                <div onclick="selectAccountRole('admin')" class="p-4 rounded-xl border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 cursor-pointer transition flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full font-bold">ADMIN / OVERSEER</span>
+                        <h4 class="font-bold text-white text-sm mt-1">FoodBridge Admin Portal</h4>
+                        <p class="text-xs text-slate-300">Full Access & Platform Logistics Overseer</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-amber-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VERIFIED REVIEW PUBLISH MODAL -->
+    <div id="modal-review" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-400"></i> Publish Verified Pickup Review
+                </h3>
+                <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
+                <p class="text-slate-400">Item: <strong id="review-item-title" class="text-white">--</strong></p>
+                <p class="text-slate-400">Donor Entity: <strong id="review-donor-name" class="text-electric-400">--</strong></p>
+            </div>
+
+            <form onsubmit="handleReviewSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Star Rating Score</label>
+                    <select id="review-rating-val" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-bold focus:outline-none focus:border-electric-500">
+                        <option value="5">★★★★★ 5.0 - Excellent Quality & Smooth Collection</option>
+                        <option value="4">★★★★☆ 4.0 - Very Good</option>
+                        <option value="3">★★★☆☆ 3.0 - Satisfactory</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-300 mb-1">Feedback Comments</label>
+                    <textarea id="review-comment-val" rows="3" required placeholder="e.g. Prompt handoff, food was fresh and properly insulated!" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-electric-500"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeReviewModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 font-bold text-slate-950 shadow-lg">Publish Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-electric-500 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-base"></i> <span id="toast-text">Notification text</span>
+    </div>
+
+    <!-- APPLICATION LOGIC SCRIPT -->
+    <script>
+        // Global State Engine
+        let activeUser = {
+            id: 'USER-DONOR-1',
+            role: 'donor', // 'donor', 'recipient', 'admin'
+            name: 'The Taj Mahal Palace, Mumbai',
+            locality: 'Colaba',
+            address: 'Apollo Bunder, Colaba, Mumbai 400001',
+            phone: '+91 22 6665 3366',
+            regId: 'FSSAI: 11521001000892'
+        };
+
+        let mapZoomLevel = 1;
+        let selectedPinId = null;
+        let reviewTargetOrder = null;
+
+        // Reactive Surplus Database
+        let listingsDB = [
+            {
+                id: 'MUM-201',
+                title: 'Surplus Lunch Buffet (Paneer Pasanda & Rice)',
+                diet: 'Veg',
+                quantity: '30 kg (60 meals)',
+                storage: 'Hot Container',
+                area: 'Colaba',
+                donorName: 'The Taj Mahal Palace, Mumbai',
+                address: 'Apollo Bunder, Colaba, Mumbai',
+                window: 'Pickup within 2 hours',
+                distKm: '0.8 km',
+                status: 'AVAILABLE', // AVAILABLE, PENDING, SCHEDULED, IN_TRANSIT, COMPLETED
+                claimedBy: null,
+                pinPos: { top: '38%', left: '42%' }
+            },
+            {
+                id: 'MUM-202',
+                title: 'Fresh Artisan Bakery Croissants & Sourdough',
+                diet: 'Veg',
+                quantity: '18 kg',
+                storage: 'Ambient',
+                area: 'Bandra West',
+                donorName: 'Suburban Gourmet Bakery',
+                address: 'Hill Road, Bandra West, Mumbai',
+                window: 'Pickup before 8:00 PM',
+                distKm: '3.2 km',
+                status: 'AVAILABLE',
+                claimedBy: null,
+                pinPos: { top: '28%', left: '65%' }
+            },
+            {
+                id: 'MUM-203',
+                title: 'Chilled Fruit Salads & Dessert Cups',
+                diet: 'Veg',
+                quantity: '40 portions',
+                storage: 'Refrigerated',
+                area: 'Lower Parel',
+                donorName: 'Corporate Park Caterers',
+                address: 'Senapati Bapat Marg, Lower Parel',
+                window: 'Pickup before 6:30 PM',
+                distKm: '2.1 km',
+                status: 'PENDING',
+                claimedBy: 'Roti Bank Mumbai NGO',
+                pinPos: { top: '58%', left: '50%' }
+            },
+            {
+                id: 'MUM-204',
+                title: 'Packed Banquet Dinner - Chicken & Rice',
+                diet: 'Non-Veg',
+                quantity: '45 kg (90 meals)',
+                storage: 'Hot Container',
+                area: 'Andheri East',
+                donorName: 'Airport Hub Hotel Catering',
+                address: 'Sahar Road, Andheri East, Mumbai',
+                window: 'Pickup before 10:00 PM',
+                distKm: '6.4 km',
+                status: 'COMPLETED',
+                claimedBy: 'Roti Bank Mumbai NGO',
+                pinPos: { top: '72%', left: '32%' }
+            }
+        ];
+
+        // Verified Reviews Database
+        let reviewsDB = [
+            {
+                id: 'REV-101',
+                donorName: 'The Taj Mahal Palace, Mumbai',
+                reviewerName: 'Roti Bank Mumbai NGO',
+                itemTitle: 'Royal Banquet Surplus Rice & Curry',
+                rating: 5,
+                comment: 'Freshly packed in hot containers and handed off with full FSSAI documentation. Fed over 120 individuals at our Lower Parel center.',
+                date: 'Yesterday'
+            }
+        ];
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            syncProfileUI();
+            renderAllViews();
+        });
+
+        // Tab Navigation Router
+        function switchTab(tabId) {
+            const allTabs = ['dashboard', 'feed', 'map', 'collections', 'reviews', 'profile'];
+            
+            allTabs.forEach(id => {
+                const el = document.getElementById(`tab-${id}`);
+                const btn = document.getElementById(`nav-btn-${id}`);
+                if (el) el.classList.add('hidden');
+                if (btn) {
+                    btn.classList.remove('bg-electric-500', 'text-white');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
+            const activeEl = document.getElementById(`tab-${tabId}`);
+            const activeBtn = document.getElementById(`nav-btn-${tabId}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.classList.add('bg-electric-500', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            renderAllViews();
+        }
+
+        // Render All Dependent Components
+        function renderAllViews() {
+            renderDashboard();
+            renderFeedListings();
+            renderMapPins();
+            renderCollectionsPipeline();
+            renderReviewsFeed();
+            updateBadges();
+        }
+
+        // 1. Dashboard View
+        function renderDashboard() {
+            const recentContainer = document.getElementById('dashboard-recent-list');
+            const availableList = listingsDB.filter(i => i.status === 'AVAILABLE').slice(0, 4);
+
+            recentContainer.innerHTML = availableList.map(item => `
+                <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-md">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] px-2 py-0.2 rounded-full font-bold ${item.diet === 'Veg' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${item.diet}</span>
+                            <span class="text-[10px] text-slate-400">${item.area} (${item.distKm})</span>
+                        </div>
+                        <h4 class="font-bold text-white text-xs mt-1 line-clamp-1">${item.title}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Qty: <strong>${item.quantity}</strong></p>
+                    </div>
+                    <button onclick="requestClaim('${item.id}')" class="bg-electric-500 hover:bg-electric-600 text-white font-bold text-[11px] px-3 py-1.5 rounded-xl transition shadow-md shrink-0">
+                        Claim
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // 2. Feed Listings View
+        function renderFeedListings() {
+            const container = document.getElementById('feed-grid-container');
+            const searchVal = (document.getElementById('feed-search-input')?.value || '').toLowerCase();
+            const areaVal = document.getElementById('feed-area-filter')?.value || 'ALL';
+            const dietVal = document.getElementById('feed-diet-filter')?.value || 'ALL';
+
+            const filtered = listingsDB.filter(item => {
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || item.donorName.toLowerCase().includes(searchVal);
+                const matchArea = areaVal === 'ALL' || item.area === areaVal;
+                const matchDiet = dietVal === 'ALL' || item.diet === dietVal;
+                return matchSearch && matchArea && matchDiet;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-500 space-y-2">
+                        <i class="fa-solid fa-utensils text-3xl mb-1"></i>
+                        <p class="font-medium text-slate-400">No surplus food listings match your filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-electric-500/50 transition shadow-lg">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${item.diet === 'Veg' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${item.diet}</span>
+                            <span class="text-[10px] text-slate-400"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> ${item.area} (${item.distKm})</span>
+                        </div>
+                        <h4 class="font-bold text-white text-sm line-clamp-1">${item.title}</h4>
+                        <p class="text-xs text-electric-400 font-medium">${item.donorName}</p>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1 text-xs">
+                            <p class="text-slate-300"><strong>Quantity:</strong> ${item.quantity}</p>
+                            <p class="text-slate-300"><strong>Storage:</strong> ${item.storage}</p>
+                            <p class="text-amber-400"><strong>Window:</strong> ${item.window}</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                        ${item.status === 'AVAILABLE' ? `
+                            <button onclick="requestClaim('${item.id}')" class="w-full bg-electric-500 hover:bg-electric-600 text-white font-bold text-xs py-2 rounded-xl transition shadow-lg shadow-electric-500/20">
+                                Request Pickup Collection
+                            </button>
+                        ` : `
+                            <div class="w-full text-center py-1.5 bg-slate-900 border border-slate-700 text-xs text-amber-400 font-bold rounded-xl">
+                                Status: ${item.status.replace('_', ' ')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Map View Pins Render
+        function renderMapPins() {
+            const layer = document.getElementById('map-pins-layer');
+            const searchVal = (document.getElementById('map-search-text')?.value || '').toLowerCase();
+            const areaVal = document.getElementById('map-area-select')?.value || 'ALL';
+
+            const filtered = listingsDB.filter(item => {
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || item.area.toLowerCase().includes(searchVal);
+                const matchArea = areaVal === 'ALL' || item.area === areaVal;
+                return matchSearch && matchArea;
+            });
+
+            document.getElementById('map-active-count').textContent = filtered.length;
+
+            layer.innerHTML = filtered.map(item => `
+                <div onclick="clickMapPin('${item.id}')" style="top: ${item.pinPos.top}; left: ${item.pinPos.left}; transform: scale(${mapZoomLevel});" class="absolute cursor-pointer -translate-x-1/2 -translate-y-1/2 transition-transform duration-200 group">
+                    <div class="w-8 h-8 rounded-full ${item.id === selectedPinId ? 'bg-electric-500 ring-4 ring-electric-500/40 pin-active' : 'bg-slate-800 border-2 border-electric-500'} flex items-center justify-center text-white shadow-xl">
+                        <i class="fa-solid ${item.diet === 'Veg' ? 'fa-leaf text-emerald-400' : 'fa-drumstick-bite text-amber-400'} text-xs"></i>
+                    </div>
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-slate-900 border border-slate-700 text-[10px] text-white px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                        ${item.title} (${item.distKm})
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clickMapPin(id) {
+            selectedPinId = id;
+            renderMapPins();
+            const item = listingsDB.find(i => i.id === id);
+            const drawer = document.getElementById('map-drawer');
+
+            if (!item) return;
+
+            drawer.classList.remove('hidden');
+            drawer.innerHTML = `
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-2 py-0.2 rounded-full font-bold ${item.diet === 'Veg' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${item.diet}</span>
+                            <span class="text-[10px] text-slate-400">${item.area} • ${item.distKm}</span>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mt-1">${item.title}</h4>
+                        <p class="text-xs text-electric-400 font-medium">${item.donorName}</p>
+                        <p class="text-xs text-slate-300 mt-1">Qty: <strong>${item.quantity}</strong> | Window: <strong class="text-amber-400">${item.window}</strong></p>
+                    </div>
+                    <button onclick="closeMapDrawer()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">${item.address}</span>
+                    ${item.status === 'AVAILABLE' ? `
+                        <button onclick="requestClaim('${item.id}')" class="bg-electric-500 hover:bg-electric-600 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition shadow-lg shadow-electric-500/20">
+                            Request Pickup
+                        </button>
+                    ` : `
+                        <span class="text-xs font-bold text-amber-400">${item.status.replace('_', ' ')}</span>
+                    `}
+                </div>
+            `;
+        }
+
+        function closeMapDrawer() {
+            document.getElementById('map-drawer').classList.add('hidden');
+            selectedPinId = null;
+            renderMapPins();
+        }
+
+        function adjustZoom(delta) {
+            mapZoomLevel = Math.max(0.7, Math.min(1.5, mapZoomLevel + delta));
+            renderMapPins();
+        }
+
+        // 4. Logistics Collections Pipeline Render
+        function renderCollectionsPipeline() {
+            const container = document.getElementById('collections-pipeline-list');
+            const activeList = listingsDB.filter(i => i.status !== 'AVAILABLE');
+
+            if (activeList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-500 space-y-2">
+                        <i class="fa-solid fa-truck-ramp-box text-3xl mb-1"></i>
+                        <p class="font-medium text-slate-400">No active collection requests in pipeline.</p>
+                        <p class="text-xs">Browse the feed or map view and claim surplus food items to initiate collection.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activeList.map(item => `
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl space-y-3 shadow-lg">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700 pb-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400">Order Ref: ${item.id}</span>
+                            <h4 class="font-bold text-white text-sm">${item.title}</h4>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold ${getStatusClass(item.status)}">${item.status.replace('_', ' ')}</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                        <p>Donor: <strong class="text-white">${item.donorName}</strong></p>
+                        <p>Recipient: <strong class="text-electric-400">${item.claimedBy || 'Roti Bank NGO'}</strong></p>
+                        <p>Pickup Address: <strong class="text-slate-200">${item.address}</strong></p>
+                        <p>Quantity: <strong class="text-slate-200">${item.quantity}</strong></p>
+                    </div>
+
+                    <!-- Step-by-Step Logistics Tracker -->
+                    <div class="grid grid-cols-4 gap-1 text-[10px] text-center pt-2">
+                        <div class="p-1.5 rounded-lg ${item.status === 'PENDING' ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-950 text-slate-500'}">1. Pending</div>
+                        <div class="p-1.5 rounded-lg ${item.status === 'SCHEDULED' ? 'bg-electric-500 text-white font-bold' : 'bg-slate-950 text-slate-500'}">2. Scheduled</div>
+                        <div class="p-1.5 rounded-lg ${item.status === 'IN_TRANSIT' ? 'bg-purple-500 text-white font-bold' : 'bg-slate-950 text-slate-500'}">3. In Transit</div>
+                        <div class="p-1.5 rounded-lg ${item.status === 'COMPLETED' ? 'bg-emerald-500 text-white font-bold' : 'bg-slate-950 text-slate-500'}">4. Completed</div>
+                    </div>
+
+                    <!-- Interactive Status Control Buttons -->
+                    <div class="pt-2 border-t border-slate-700 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="advanceOrderStatus('${item.id}', 'SCHEDULED')" class="text-[11px] bg-slate-900 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1 rounded-lg font-medium">Schedule</button>
+                            <button onclick="advanceOrderStatus('${item.id}', 'IN_TRANSIT')" class="text-[11px] bg-slate-900 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1 rounded-lg font-medium">In-Transit</button>
+                            <button onclick="advanceOrderStatus('${item.id}', 'COMPLETED')" class="text-[11px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">Complete</button>
+                        </div>
+
+                        <!-- STRICT REVIEW UNLOCK -->
+                        ${item.status === 'COMPLETED' ? `
+                            <button onclick="openReviewModal('${item.id}')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-3 py-1.5 rounded-xl font-bold transition shadow-md flex items-center gap-1">
+                                <i class="fa-solid fa-star"></i> Leave Review
+                            </button>
+                        ` : `
+                            <span class="text-[10px] text-slate-500 italic"><i class="fa-solid fa-lock mr-1"></i> Review unlocks upon completion</span>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 5. Verified Reviews View Render
+        function renderReviewsFeed() {
+            const container = document.getElementById('reviews-feed-container');
+
+            if (reviewsDB.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">No verified pickup reviews published yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = reviewsDB.map(rev => `
+                <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl space-y-2 shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${rev.reviewerName}</h4>
+                            <p class="text-[11px] text-electric-400">Donor: ${rev.donorName}</p>
+                        </div>
+                        <span class="text-amber-400 font-extrabold text-xs bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-full">
+                            <i class="fa-solid fa-star mr-1"></i> ${rev.rating}.0
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-200 italic">"${rev.comment}"</p>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-700/60">
+                        <span>Verified Item: ${rev.itemTitle}</span>
+                        <span>${rev.date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Core Interactive Actions
+        function requestClaim(id) {
+            const item = listingsDB.find(i => i.id === id);
+            if (!item) return;
+
+            item.status = 'PENDING';
+            item.claimedBy = activeUser.name;
+            showToast(`Collection request placed for "${item.title}"`);
+            closeMapDrawer();
+            renderAllViews();
+        }
+
+        function advanceOrderStatus(id, nextStatus) {
+            const item = listingsDB.find(i => i.id === id);
+            if (!item) return;
+
+            item.status = nextStatus;
+            showToast(`Logistics order ${id} updated to ${nextStatus.replace('_', ' ')}`);
+            renderAllViews();
+        }
+
+        // Device Shell Switcher
+        function setDeviceMode(mode) {
+            const viewport = document.getElementById('device-viewport');
+            const statusBar = document.getElementById('mobile-status-bar');
+
+            document.querySelectorAll('.shell-btn').forEach(b => {
+                b.classList.remove('bg-electric-500', 'text-white');
+                b.classList.add('text-slate-400');
+            });
+
+            const activeBtn = document.getElementById(`shell-btn-${mode}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-electric-500', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            viewport.className = 'bg-slate-900 flex flex-col transition-all duration-300 relative shadow-2xl ';
+
+            if (mode === 'iphone') {
+                viewport.classList.add('device-iphone');
+                statusBar.classList.remove('hidden');
+            } else if (mode === 'android') {
+                viewport.classList.add('device-android');
+                statusBar.classList.remove('hidden');
+            } else {
+                viewport.classList.add('device-desktop');
+                statusBar.classList.add('hidden');
+            }
+        }
+
+        // Profile Form Engine
+        function syncProfileUI() {
+            document.getElementById('top-user-name').textContent = activeUser.name;
+            document.getElementById('top-user-role').textContent = `${activeUser.role.toUpperCase()} • ${activeUser.locality}, Mumbai`;
+
+            document.getElementById('prof-display-name').textContent = activeUser.name;
+            document.getElementById('prof-display-address').innerHTML = `<i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> ${activeUser.address}`;
+            document.getElementById('prof-display-reg').innerHTML = `<i class="fa-solid fa-id-card text-electric-400 mr-1"></i> ${activeUser.regId}`;
+            document.getElementById('prof-display-role-badge').textContent = activeUser.role.toUpperCase();
+
+            document.getElementById('prof-input-name').value = activeUser.name;
+            document.getElementById('prof-input-reg').value = activeUser.regId;
+            document.getElementById('prof-input-phone').value = activeUser.phone;
+            document.getElementById('prof-input-area').value = activeUser.locality;
+            document.getElementById('prof-input-address').value = activeUser.address;
+
+            // Welcome banner on dashboard
+            const titleEl = document.getElementById('dash-welcome-title');
+            const badgeEl = document.getElementById('dash-role-badge');
+            if (titleEl) titleEl.textContent = `Welcome back, ${activeUser.name}`;
+            if (badgeEl) badgeEl.textContent = `${activeUser.role.toUpperCase()} VIEW`;
+        }
+
+        function saveProfileChanges() {
+            activeUser.name = document.getElementById('prof-input-name').value;
+            activeUser.regId = document.getElementById('prof-input-reg').value;
+            activeUser.phone = document.getElementById('prof-input-phone').value;
+            activeUser.locality = document.getElementById('prof-input-area').value;
+            activeUser.address = document.getElementById('prof-input-address').value;
+
+            syncProfileUI();
+            showToast("Profile details updated successfully!");
+        }
+
+        // Post Surplus Modal
+        function openPostModal() {
+            document.getElementById('modal-post').classList.remove('hidden');
+        }
+        function closePostModal() {
+            document.getElementById('modal-post').classList.add('hidden');
+        }
+
+        function handlePostSubmit(e) {
+            e.preventDefault();
+
+            const newItem = {
+                id: `MUM-${Math.floor(200 + Math.random() * 800)}`,
+                title: document.getElementById('post-title').value,
+                diet: document.getElementById('post-diet').value,
+                quantity: document.getElementById('post-quantity').value,
+                storage: document.getElementById('post-storage').value,
+                area: document.getElementById('post-area').value,
+                donorName: activeUser.name,
+                address: document.getElementById('post-address').value,
+                window: document.getElementById('post-window').value,
+                distKm: '1.1 km',
+                status: 'AVAILABLE',
+                claimedBy: null,
+                pinPos: { top: `${30 + Math.random() * 40}%`, left: `${30 + Math.random() * 40}%` }
+            };
+
+            listingsDB.unshift(newItem);
+            closePostModal();
+            document.getElementById('form-post-surplus').reset();
+            showToast("New surplus food item published to Mumbai map!");
+            renderAllViews();
+        }
+
+        // Review Modal
+        function openReviewModal(requestId) {
+            const item = listingsDB.find(i => i.id === requestId);
+            if (!item) return;
+
+            reviewTargetOrder = requestId;
+            document.getElementById('review-item-title').textContent = item.title;
+            document.getElementById('review-donor-name').textContent = item.donorName;
+            document.getElementById('modal-review').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('modal-review').classList.add('hidden');
+            reviewTargetOrder = null;
+        }
+
+        function handleReviewSubmit(e) {
+            e.preventDefault();
+            const item = listingsDB.find(i => i.id === reviewTargetOrder);
+            if (!item) return;
+
+            reviewsDB.unshift({
+                id: `REV-${Math.floor(100 + Math.random() * 900)}`,
+                donorName: item.donorName,
+                reviewerName: activeUser.name,
+                itemTitle: item.title,
+                rating: parseInt(document.getElementById('review-rating-val').value),
+                comment: document.getElementById('review-comment-val').value,
+                date: 'Just now'
+            });
+
+            closeReviewModal();
+            showToast("Verified pickup review published!");
+            renderAllViews();
+        }
+
+        // Auth Role Switcher Modal
+        function openAuthModal() {
+            document.getElementById('modal-auth').classList.remove('hidden');
+        }
+        function closeAuthModal() {
+            document.getElementById('modal-auth').classList.add('hidden');
+        }
+
+        function selectAccountRole(role) {
+            if (role === 'donor') {
+                activeUser = {
+                    id: 'USER-DONOR-1',
+                    role: 'donor',
+                    name: 'The Taj Mahal Palace, Mumbai',
+                    locality: 'Colaba',
+                    address: 'Apollo Bunder, Colaba, Mumbai 400001',
+                    phone: '+91 22 6665 3366',
+                    regId: 'FSSAI: 11521001000892'
+                };
+            } else if (role === 'recipient') {
+                activeUser = {
+                    id: 'USER-NGO-1',
+                    role: 'recipient',
+                    name: 'Roti Bank Mumbai NGO',
+                    locality: 'Lower Parel',
+                    address: 'Acharya Donde Marg, Lower Parel, Mumbai',
+                    phone: '+91 98200 12345',
+                    regId: 'NGO Reg #88412'
+                };
+            } else {
+                activeUser = {
+                    id: 'USER-ADMIN-1',
+                    role: 'admin',
+                    name: 'FoodBridge Admin Portal',
+                    locality: 'Mumbai HQ',
+                    address: 'BKC Financial Center, Mumbai',
+                    phone: '+91 22 4000 0000',
+                    regId: 'ADMIN-ACCESS-LEVEL-1'
+                };
+            }
+
+            closeAuthModal();
+            syncProfileUI();
+            showToast(`Switched active role profile to ${activeUser.name}`);
+            renderAllViews();
+        }
+
+        // Utility Helpers
+        function getStatusClass(status) {
+            switch(status) {
+                case 'PENDING': return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                case 'SCHEDULED': return 'bg-electric-500/20 text-electric-400 border border-electric-500/30';
+                case 'IN_TRANSIT': return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+                case 'COMPLETED': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                default: return 'bg-slate-700 text-slate-300';
+            }
+        }
+
+        function updateBadges() {
+            const activeCount = listingsDB.filter(i => i.status !== 'AVAILABLE').length;
+            const badge = document.getElementById('tab-badge-collections');
+            const collectionsHeaderBadge = document.getElementById('collections-count-badge');
+            
+            if (badge) badge.textContent = activeCount;
+            if (collectionsHeaderBadge) collectionsHeaderBadge.textContent = `${activeCount} Orders Active`;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
